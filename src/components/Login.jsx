@@ -1,8 +1,14 @@
 import React, { Component } from 'react';
-import { Grid, Row, Panel, Panelbody, Form, FormControl, FormGroup, ControlLabel, Button, Col } from 'react-bootstrap';
-import jsonData from '../data/jsonData';
-import Registration from './Registration';
-import { Redirect, Link } from 'react-router-dom';
+import { Grid } from 'react-bootstrap';
+import { Redirect } from 'react-router-dom';
+import { app } from '../firebase/firebaseconfig'
+import Loading from 'react-loading-bar'
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import AppBar from 'material-ui/AppBar';
+import RaisedButton from 'material-ui/RaisedButton';
+import TextField from 'material-ui/TextField';
+import 'react-loading-bar/dist/index.css'
+import toastr from 'toastr';
 // import { browserHistory, Link } from 'react-router';
 class Login extends Component {
 
@@ -11,71 +17,68 @@ class Login extends Component {
         this.state = {
             email: "",
             password: "",
+            show: false,
             redirect: false
         }
     }
-
     handleChange = (e) => {
         e.preventDefault();
         this.setState({ [e.target.type]: e.target.value })
     }
 
     handleSubmit = (e) => {
+        this.setState({ show: true })
         e.preventDefault();
-        for (var data in jsonData) {
-            console.log(jsonData[data])
-            if (this.state.email === jsonData[data].email && this.state.password === jsonData[data].password) {
-                this.setState({ redirect: true })
-                return;
-            } else {
 
-            }
-        }
+        app.auth().signInWithEmailAndPassword(this.state.email, this.state.password)
+            .then(() => {
+                toastr.success("login successfully")
+                this.setState({ redirect: true, show: false })
+            })
+            .catch(error => {
+                toastr.error(error.message)
+                this.setState({ redirect: false, show: false })
+            })
+
     }
 
     render() {
         if (this.state.redirect) {
-            return < Redirect to="/view" />;
+            return < Redirect to="/dashboard" />;
         }
         return (
             <div>
-                <br />
-                <Grid >
-                    <Row >
-                        <Col sm={3}><h1>Log In</h1><Link to="/register">Register here</Link></Col>
-                    </Row>
-                    <hr />
-                    <Panel >
-                        <Panel.Body>
-                            <Form horizontal >
-                                <FormGroup controlId="formHorizontalEmail">
-                                    <Col componentClass={ControlLabel} sm={2}>
-                                        Email
-        </Col>
-                                    <Col sm={10}>
-                                        <FormControl type="email" value={this.state.email} onChange={this.handleChange} placeholder="Email" />
-                                    </Col>
-                                </FormGroup>
+                <Loading
+                    show={this.state.show}
+                    color="red"
+                />
 
-                                <FormGroup controlId="formHorizontalPassword">
-                                    <Col componentClass={ControlLabel} sm={2}>
-                                        Password
-        </Col>
-                                    <Col sm={10}>
-                                        <FormControl type="password" value={this.state.password} onChange={this.handleChange} placeholder="Password" />
-                                    </Col>
-                                </FormGroup>
 
-                                <FormGroup>
-                                    <Col smOffset={2} sm={1}>
-                                        <Button type="submit" onClick={this.handleSubmit}>Sign in</Button>
-                                    </Col>
-                                </FormGroup>
+                <MuiThemeProvider>
+                    <div>
+                        <AppBar
+                            title="Login"
+                        />
+                        <Grid>
+                            <TextField
+                                hintText="Enter your EmailId"
+                                floatingLabelText="Email"
+                                type="email"
+                                onChange={this.handleChange}
+                            />
+                            <br />
+                            <TextField
+                                type="password"
+                                hintText="Enter your Password"
+                                floatingLabelText="Password"
+                                onChange={this.handleChange}
+                            />
+                            <br />
+                            <RaisedButton label="LogIn" primary={true} onClick={this.handleSubmit} />
+                        </Grid>
+                    </div>
+                </MuiThemeProvider>
 
-                            </Form>
-                        </Panel.Body>
-                    </Panel>
-                </Grid>
             </div>
         );
     }

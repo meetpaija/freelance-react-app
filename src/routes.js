@@ -1,16 +1,17 @@
 import React from 'react';
-import { Route, Router, Switch } from 'react-router-dom'
+import { Route, Switch } from 'react-router-dom'
 import App from './App'
-import Login from './components/Login';
 import Registration from './components/Registration';
-import ViewData from './components/ViewData';
+import Dashboard from './components/Dashboard';
 
 const Routes = () => {
     return (<Switch>
         <Route exact
             path="/" component={App} />
-        <Route path="/register" component={Registration} />
-        <Route path="/view" component={ViewData} />
+        <Route exact
+            path="/login" component={App} />
+        <Route exact path="/add-admin" component={Registration} />
+        <Route exact path="/dashboard" component={Dashboard} />
     </Switch>);
 }
 
